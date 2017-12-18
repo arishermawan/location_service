@@ -25,6 +25,11 @@ class LocationsController < ApplicationController
     json_response(@location)
   end
 
+  def address
+    @location = Location.new.get_location(params[:location])
+    json_response(@location)
+  end
+
   def update
     @location.update(location_params)
     head :no_content

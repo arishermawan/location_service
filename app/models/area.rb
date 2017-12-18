@@ -3,15 +3,12 @@ class Area < ApplicationRecord
 
   def enqueue(driver)
     queues = []
-    if queue.nil?
-      queues = []
-    else
+    if !queue.nil?
       queues = eval(queue)
     end
-    puts "----------------------------------------------------------------------#{driver}"
-    puts "---------------------------------------------------------------------#{queues}"
-    queues << driver  
-    puts "-------------------------------------------------#{queues}"
+    puts "-------------------------------------------------------#{queues}"
+    queues << driver
+    puts "-------------------------------------------------------#{queues}"
     self.update(queue:queues)
   end
 
@@ -20,9 +17,11 @@ class Area < ApplicationRecord
   end
 
   def delete(driver)
+        puts "------------------------------------111111111111111111111111111111#{driver}"
     queues = eval(queue)
     queues.reject! { |element| element == driver }
     self.update(queue:queues)
+    puts "------------------------------------------1111111111111111111111111111"
   end
 
 
