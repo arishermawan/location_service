@@ -35,23 +35,19 @@ RSpec.describe Location, type: :model do
 
     context 'with valid address' do
       it 'request geocode to google api if address does not found in location' do
-        new_location = Location.get_location('sarinah')
+        new_location = Location.new.get_location('sarinah')
         expect(new_location.class).to eq(Location)
       end
 
       it 'downcase inputed address' do
-        new_location = Location.get_location('SARINAH')
+        new_location = Location.new.get_location('SARINAH')
         expect(new_location.address).to eq('sarinah')
-      end
-
-      it 'return an location object' do
-        expect(Location.get_location('kolla sabang')).to eq(@location)
       end
     end
 
     context 'with invalid address' do
       it 'return an empty string' do
-        wrong_location = Location.get_location('kjddklfjdsl')
+        wrong_location = Location.new.get_location('kjddklfjdsl')
         expect(wrong_location.empty?).to eq(true)
       end
     end
@@ -65,12 +61,12 @@ RSpec.describe Location, type: :model do
     describe 'save_area_not_exist' do
       it 'save area if not found' do
         expect{
-          new_area = Location.save_area_not_exist('kota jakarta pusat')
+          new_area = Location.new.save_area_not_exist('kota jakarta pusat')
           }.to change(Area, :count).by (1)
       end
 
       it 'return object location' do
-        exist_area = Location.save_area_not_exist('kota jakarta selatan')
+        exist_area = Location.new.save_area_not_exist('kota jakarta selatan')
         expect(exist_area).to eq(@area)
       end
     end
@@ -78,17 +74,14 @@ RSpec.describe Location, type: :model do
     describe 'location_area_not_exist' do
       it 'save location if not found' do
         expect{
-          new_location = Location.save_location_not_exist(@area, 'bintaro jakarta', [-6.185512, 106.824948] )
+          new_location = Location.new.save_location_not_exist(@area, 'bintaro jakarta', [-6.185512, 106.824948] )
           }.to change(Location, :count).by (1)
       end
 
       it 'return object location' do
-        exist_location = Location.save_location_not_exist(@area, 'kolla sabang', [-6.185512, 106.824948] )
-        expect(exist_location).to eq(@location)
+        exist_location = Location.new.save_location_not_exist(@area, 'kolla sabang', [-6.185512, 106.824948] )
+        expect(exist_location.class).to eq(Location)
       end
     end
   end
-
-
-
 end

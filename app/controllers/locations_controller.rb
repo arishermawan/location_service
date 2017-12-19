@@ -51,7 +51,7 @@ class LocationsController < ApplicationController
   end
 
   def driver_params
-    params.permit(:address, :driver_id, :location_id)
+    params.permit(:address, :driver_id, :location_id, :service)
   end
 
   def set_location

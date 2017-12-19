@@ -17,19 +17,16 @@ class Location < ApplicationRecord
     driver_address = driver_params[:address]
     driver_id = driver_params[:driver_id].to_i
     location_id = driver_params[:location_id]
-    puts "---------------------------------------------------------------#{location_id}"
-
-
+    service = driver_params[:service]
     location = get_location(driver_address)
-    puts "---------------------------------------------------------------#{location}"
     new_area = location.area
 
     if !location_id.nil?
       old_location = Location.find(location_id)
       old_area = old_location.area
-      old_area.delete({driver:driver_id, location:old_location.id})
+      old_area.delete({driver:driver_id, location:old_location.id, service:service})
     end
-      new_area.enqueue({driver:driver_id, location:location.id})
+      new_area.enqueue({driver:driver_id, location:location.id, service:service})
     location
   end
 
@@ -78,10 +75,8 @@ class Location < ApplicationRecord
     rad_per_deg = Math::PI/180
     rkm = 6371
     rm = rkm * 1000
-
     dlat_rad = (loc2[0]-loc1[0]) * rad_per_deg
     dlon_rad = (loc2[1]-loc1[1]) * rad_per_deg
-
     lat1_rad, lon1_rad = loc1.map {|i| i * rad_per_deg }
     lat2_rad, lon2_rad = loc2.map {|i| i * rad_per_deg }
 
@@ -133,30 +128,13 @@ class Location < ApplicationRecord
   end
 
 
-  def nearest_driver
-    pickup_location = Location.get_location(pickup)
-    customer_destination = Location.get_location(destination)
-    drivers = Driver.where(area_id: pickup_location.area_id)
-    origin_coordinate = eval(pickup_location.coordinate)
-
-    drivers_dist = drivers.reduce(Hash.new) do |hash, driver|
-      hash[driver.name] = Location.distance(origin_coordinate, driver.coordinate)
-      hash
-    end
-    drivers_dist.min_by { |driver, length| length }
+  def get_driver(service, pickup)
+    pickup_location = get_location(pickup)
+    area = pickup_location.area
+    driver = area.dequeue(service, pickup_location)
+    driver
   end
 
-  def nearest_all_drivers
-    pickup_location = Location.get_location(pickup)
-    customer_destination = Location.get_location(destination)
-    drivers = Driver.all
-    origin_coordinate = eval(pickup_location.coordinate)
 
-    drivers_dist = drivers.reduce(Hash.new) do |hash, driver|
-      hash[driver.name] = Location.distance(origin_coordinate, driver.coordinate)
-      hash
-    end
-    drivers_dist.min_by { |driver, length| length }
-  end
 
 end
