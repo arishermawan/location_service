@@ -134,4 +134,69 @@ RSpec.describe Location, type: :model do
       end
     end
   end
+
+  describe "distance_result" do
+    context "with valid attributes" do
+      before :each do
+        @location = {origin:'kolla sabang', destination:'sarinah'}
+        @result = Location.new.distance_result(@location)
+      end
+
+      it "return distance beetween 2 location" do
+        expect(@result[:distance]).to eq(0.33)
+      end
+
+      it "return origin address" do
+        expect(@result[:origin].empty?).not_to eq(true)
+      end
+
+      it "return destination address" do
+        expect(@result[:destination].empty?).not_to eq(true)
+      end
+
+      it "return unit in KM" do
+        expect(@result[:unit]).to eq("KM")
+      end
+    end
+
+    context "with invalid attributes" do
+      before :each do
+        @location = {origin:'lkjlldajldfj', destination:'dfadfafafdf'}
+        @result = Location.new.distance_result(@location)
+      end
+
+      it "return zero value" do
+        expect(@result[:distance]).to eq(0.0)
+      end
+
+      it "return empty origin address" do
+        expect(@result[:origin].empty?).to eq(true)
+      end
+
+      it "return empty destination address" do
+        expect(@result[:destination].empty?).to eq(true)
+      end
+    end
+  end
+
+  describe "get driver" do
+    before :each do
+      @location1 = Location.new.get_location('kolla sabang')
+      @area1 = @location1.area
+      @area1.enqueue({driver:1, location:@location1.id, service:'goride'})
+      @area1.enqueue({driver:2, location:@location1.id, service:'gocar'})
+      @area1.enqueue({driver:3, location:@location1.id, service:'gocar'})
+      @area1.enqueue({driver:4, location:@location1.id, service:'goride'})
+    end
+
+    it "request a driver in area queue by service type" do
+      expect(@location1.get_driver('goride','kolla sabang')).to eq(1)
+    end
+
+    it "return empty value when no driver in area queue" do
+      @area1.dequeue('goride', @location1)
+      @area1.dequeue('goride', @location1)
+      expect(@location1.get_driver('goride','kolla sabang')).to eq("")
+    end
+  end
 end

@@ -14,11 +14,11 @@ class Area < ApplicationRecord
     result = ''
     drivers = eval(queue)
     origin_coordinate = eval(location.coordinate)
-    service_dist = drivers.select do |driver|
+    vehicles = drivers.select do |driver|
       driver[:service] == service
     end
 
-    drivers_dist = service_dist.reduce(Hash.new) do |hash, driver|
+    drivers_dist = vehicles.reduce(Hash.new) do |hash, driver|
       driver_id = driver[:driver]
       driver_coordinate = eval(Location.find(driver[:location]).coordinate)
       hash[driver_id] = distance(origin_coordinate, driver_coordinate)
@@ -29,7 +29,7 @@ class Area < ApplicationRecord
       get_driver = drivers.find{ |driver| driver[:driver]==nearest.first.first }
       result = drivers.delete(get_driver)
       result = result[:driver]
-      # self.update(queue:drivers)
+      self.update(queue:drivers)
     end
     result
   end
@@ -54,6 +54,5 @@ class Area < ApplicationRecord
 
     rm * c
   end
-
 
 end
