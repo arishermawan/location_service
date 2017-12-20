@@ -2,6 +2,8 @@ class LocationServicesConsumer < Racecar::Consumer
   subscribes_to "locationServices"
 
   def process(message)
+    puts "-------------#{message.value}--------------------"
+    
     array = message.value.split('-->')
     order_value = eval(array.second)
 

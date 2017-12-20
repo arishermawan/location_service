@@ -84,4 +84,54 @@ RSpec.describe Location, type: :model do
       end
     end
   end
+
+  describe "set_driver_location" do
+    before :each do
+      @area1 = create(:area, id:1, name: 'central jakarta city')
+      @location1 = create(:location, id:1, address:"kolla sabang", area: @area1)
+
+      @area2 = create(:area, id:2, name: 'south jakarta city', queue:"[{:driver=>1, :location=>2, :service=>'goride'}]")
+      @location2 = create(:location, id:2, address:"bintaro", area: @area2)
+
+      @driver_params = {address:'kolla sabang', driver_id: 1, location_id: 2, service:'goride' }
+    end
+
+    it "enqueue driver in area" do
+      Location.new.set_driver_location(@driver_params)
+      @area1.reload
+      expect(@area1.queue).to eq("[{:driver=>1, :location=>1, :service=>\"goride\"}]")
+    end
+
+    it "remove driver from queues if registered in queue before" do
+      Location.new.set_driver_location(@driver_params)
+      @area2.reload
+      expect(@area2.queue).to eq("[]")
+    end
+
+    it "return location object" do
+      expect(Location.new.set_driver_location(@driver_params)).to eq(@location1)
+    end
+  end
+
+  describe "google_distance" do
+    before :each do
+      @get_api = Location.new.google_distance('kolla sabang', 'sarinah mall')
+      @invalid_get_api = Location.new.google_distance('', '')
+    end
+    context "with valid attributes" do
+      it "return array from request google api service" do
+        expect(@get_api.empty?).to eq(false)
+      end
+
+      it "return ok status" do
+        expect(@get_api[:status]).to eq('OK')
+      end
+    end
+
+    context "with invalid attributes" do
+      it "return an empty array" do
+        expect(@invalid_get_api.empty?).to eq(true)
+      end
+    end
+  end
 end
