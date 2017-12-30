@@ -14,19 +14,11 @@ class Area < ApplicationRecord
     result = ''
     drivers = eval(queue)
     origin_coordinate = eval(location.coordinate)
-    vehicles = drivers.select do |driver|
-      driver[:service] == service
-    end
-
-    drivers_dist = vehicles.reduce(Hash.new) do |hash, driver|
-      driver_id = driver[:driver]
-      driver_coordinate = eval(Location.find(driver[:location]).coordinate)
-      hash[driver_id] = distance(origin_coordinate, driver_coordinate)
-      hash
-    end
-    nearest = drivers_dist.select { |driver, length| length < 3000 }
+    vehicles = drivers.select { |driver| driver[:service] == service }
+    drivers_distance = drivers_distance_in_area(vehicles)
+    nearest = drivers_distance.select { |driver, length| length <= 3000 }
     if !nearest.empty?
-      get_driver = drivers.find{ |driver| driver[:driver]==nearest.first.first }
+      get_driver = drivers.find{ |driver| driver[:driver] == nearest.first.first }
       result = drivers.delete(get_driver)
       result = result[:driver]
       self.update(queue:drivers)
@@ -34,8 +26,8 @@ class Area < ApplicationRecord
     result
   end
 
-  def distance_drivers_in_area(drivers)
-      distance = vehicles.reduce(Hash.new) do |hash, driver|
+  def drivers_distance_in_area(drivers)
+    distance = drivers.reduce(Hash.new) do |hash, driver|
       driver_id = driver[:driver]
       driver_coordinate = eval(Location.find(driver[:location]).coordinate)
       hash[driver_id] = distance(origin_coordinate, driver_coordinate)
@@ -57,7 +49,6 @@ class Area < ApplicationRecord
     dlon_rad = (loc2[1]-loc1[1]) * rad_per_deg
     lat1_rad, lon1_rad = loc1.map {|i| i * rad_per_deg }
     lat2_rad, lon2_rad = loc2.map {|i| i * rad_per_deg }
-
     a = Math.sin(dlat_rad/2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon_rad/2)**2
     c = 2 * Math::atan2(Math::sqrt(a), Math::sqrt(1-a))
 

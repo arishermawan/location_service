@@ -37,14 +37,7 @@ class Location < ApplicationRecord
       get_api = gmaps.geocode(address)
       if !get_api.empty?
         area = get_api[0][:address_components]
-
-        city = ''
-        area.each do |type|
-          if type[:types][0]=="administrative_area_level_2"
-            city = type[:short_name].downcase
-          end
-        end
-
+        city = get_city(area)
         check_area = save_area_not_exist(city)
         geometry = get_api[0][:geometry][:location]
         coordinate = [geometry[:lat], geometry[:lng]]
@@ -53,6 +46,16 @@ class Location < ApplicationRecord
       end
     end
     result
+  end
+
+  def get_city(area)
+    city = ''
+    area.each do |type|
+      if type[:types][0]=="administrative_area_level_2"
+        city = type[:short_name].downcase
+      end
+    end
+    city
   end
 
   def save_area_not_exist(area)
