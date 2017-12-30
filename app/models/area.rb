@@ -34,6 +34,15 @@ class Area < ApplicationRecord
     result
   end
 
+  def distance_drivers_in_area(drivers)
+      distance = vehicles.reduce(Hash.new) do |hash, driver|
+      driver_id = driver[:driver]
+      driver_coordinate = eval(Location.find(driver[:location]).coordinate)
+      hash[driver_id] = distance(origin_coordinate, driver_coordinate)
+      hash
+    end
+  end
+
   def delete(driver)
     queues = eval(queue)
     queues.delete(driver)
