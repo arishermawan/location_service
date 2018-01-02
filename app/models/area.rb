@@ -16,7 +16,7 @@ class Area < ApplicationRecord
     origin_coordinate = eval(location.coordinate)
     vehicles = drivers.select { |driver| driver[:service] == service }
     drivers_distance = drivers_distance_in_area(vehicles)
-    nearest = drivers_distance.select { |driver, length| length <= 3000 }
+    nearest = drivers_distance.select { |driver, length| length <= max_coverage_distance  }
     if !nearest.empty?
       get_driver = drivers.find{ |driver| driver[:driver] == nearest.first.first }
       result = drivers.delete(get_driver)
@@ -24,6 +24,10 @@ class Area < ApplicationRecord
       self.update(queue:drivers)
     end
     result
+  end
+
+  def max_coverage_distance
+    3000
   end
 
   def drivers_distance_in_area(drivers)
